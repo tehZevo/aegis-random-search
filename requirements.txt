@@ -1,0 +1,4 @@
+pyyaml
+tinydb
+python-on-whales
+git+https://github.com/tehzevo/protopost-python
