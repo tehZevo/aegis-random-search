@@ -15,3 +15,8 @@ a docker container that launches docker containers which potentially launch othe
   - integrate with aegis-tensorboard-logger
 - perhaps work on compose files instead of containers (but then how do we track the "main" result)
   - probably cant trust stdout of `docker-compose up` (unless logging: driver: "none"?)
+  - container communication:
+    - file IO: create global docker volume with compose and env var name like ${AEGIS_RS_23749234}
+    - network IO: create network with compose and env var name as above
+      - this allows containers to talk to eachother without rewriting their urls
+    - network IO to randomsearch's network: join networks? (names must be unique)
