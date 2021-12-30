@@ -15,8 +15,7 @@ print(PARAMS)
 
 DB_PATH = os.getenv("DB_PATH", "./db.json")
 
-#TODO: make required
-BUILD_CONTEXT = os.getenv("BUILD_CONTEXT", "./example-target")
+BUILD_CONTEXT = os.getenv("BUILD_CONTEXT", "/target")
 
 #build image
 image = docker.build(BUILD_CONTEXT)
