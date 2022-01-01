@@ -19,6 +19,4 @@ RUN python-on-whales download-cli
 
 COPY . .
 
-EXPOSE 80
-
 CMD [ "python", "-u", "main.py" ]

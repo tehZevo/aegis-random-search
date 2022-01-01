@@ -7,6 +7,7 @@ from python_on_whales import docker
 from protopost import ProtoPost
 
 PORT = int(os.getenv("PORT", 80))
+PASS_SOCKET = os.getenv("PASS_SOCKET", "false") == "true"
 NUM_WORKERS = int(os.getenv("NUM_WORKERS", 4))
 DELAY = float(os.getenv("DELAY", 0))
 PARAMS = os.getenv("PARAMS", {})
@@ -23,9 +24,12 @@ image = docker.build(BUILD_CONTEXT)
 db = TinyDB(DB_PATH)
 
 def run(**kwargs):
-  #SHHHH
-  with contextlib.redirect_stdout(open(os.devnull, 'w')), contextlib.redirect_stderr(open(os.devnull, 'w')):
-    output = docker.run(image, remove=True, envs=kwargs)
+  vols = []
+  if PASS_SOCKET:
+    vols.append(("/var/run/docker.sock", "/var/run/docker.sock"))
+
+  output = docker.run(image, remove=True, envs=kwargs, volumes=vols)
+
   #last line of stdout is the result (json)
   metrics = output.split("\n")[-1]
   metrics = json.loads(metrics)
