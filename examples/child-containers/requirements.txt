@@ -1,2 +1,0 @@
-python-on-whales
-git+https://github.com/tehzevo/protopost-python

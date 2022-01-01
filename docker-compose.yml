@@ -1,35 +1,18 @@
 version: "3.8"
 services:
 
-  random-search-mnist:
+  random-search:
     build: .
     ports:
       - "8080:80"
     volumes:
       - "//var/run/docker.sock:/var/run/docker.sock"
       #mount target build context
-      - "./examples/mnist:/target"
+      - "./examples/mnist-compose:/target"
     environment:
       NUM_WORKERS: 4
-      BUILD_CONTEXT: "/target"
       PARAMS: |
         N_LAYERS: [1, 2, 3]
         LAYER_SIZE: [16, 32, 64]
         ACTIVATION: ["tanh", "relu"]
         LR: [1e-2, 1e-3, 1e-4]
-
-  random-search-child:
-    build: .
-    ports:
-      - "8080:80"
-    volumes:
-      - "//var/run/docker.sock:/var/run/docker.sock"
-      #mount target build context
-      - "./examples/child-containers:/target"
-    environment:
-      PASS_SOCKET: true
-      NUM_WORKERS: 4
-      BUILD_CONTEXT: "/target"
-      PARAMS: |
-        APPLES: [1, 2, 3]
-        BANANAS: [2, 3, 4]

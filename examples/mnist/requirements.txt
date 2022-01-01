@@ -1,3 +1,2 @@
 tensorflow
 numpy
-git+https://github.com/tehzevo/protopost-python

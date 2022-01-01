@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+
+  main:
+    build: .
+    environment:
+      N_LAYERS: ${N_LAYERS}
+      LAYER_SIZE: ${LAYER_SIZE}
+      ACTIVATION: ${ACTIVATION}
+      LR: ${LR}

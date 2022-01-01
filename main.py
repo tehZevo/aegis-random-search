@@ -1,38 +1,52 @@
-import os, random, time, threading, json, contextlib
+import os, random, time, threading, json, contextlib, uuid
 import concurrent.futures
 
 import yaml
-from tinydb import TinyDB, Query
-from python_on_whales import docker
+from python_on_whales import docker, DockerClient
 from protopost import ProtoPost
 
 PORT = int(os.getenv("PORT", 80))
-PASS_SOCKET = os.getenv("PASS_SOCKET", "false") == "true"
 NUM_WORKERS = int(os.getenv("NUM_WORKERS", 4))
 DELAY = float(os.getenv("DELAY", 0))
 PARAMS = os.getenv("PARAMS", {})
 PARAMS = yaml.safe_load(PARAMS)
 print(PARAMS)
 
-DB_PATH = os.getenv("DB_PATH", "./db.json")
-
 BUILD_CONTEXT = os.getenv("BUILD_CONTEXT", "/target")
 
-#build image
-image = docker.build(BUILD_CONTEXT)
-
-db = TinyDB(DB_PATH)
-
 def run(**kwargs):
-  vols = []
-  if PASS_SOCKET:
-    vols.append(("/var/run/docker.sock", "/var/run/docker.sock"))
+  #create project name
+  id = uuid.uuid4()
+  #create env file from kwargs
+  env_filename = f"{id}.env"
+  with open(env_filename, "w") as f:
+    s = "\n".join([f"{k}={v}" for k, v in kwargs.items()])
+    f.write(s)
 
-  output = docker.run(image, remove=True, envs=kwargs, volumes=vols)
+  #create new docker client
+  client = DockerClient(
+    compose_files=[os.path.join(BUILD_CONTEXT, "docker-compose.yml")],
+    compose_env_file=env_filename,
+    compose_project_name=f"aegis-random-search-{id}"
+  )
+
+  #compose run (stream=True to output lines)
+  #TODO: suppress output
+  #TODO: cleanup
+  # with contextlib.redirect_stdout(None):
+  output = client.compose.run("main", tty=False, stream=True)
+  output = [s[1] for s in output if s[0] == "stdout"] #grab all stdout lines
 
   #last line of stdout is the result (json)
-  metrics = output.split("\n")[-1]
+  metrics = output[-1]
   metrics = json.loads(metrics)
+
+  #remove containers
+  client.compose.down(volumes=True)
+
+  #delete env file
+  os.remove(env_filename)
+
   time.sleep(DELAY)
   return metrics
 
@@ -73,7 +87,6 @@ def thread_cute():
           counter += 1
           print(counter, params, metrics)
           results.append([params, metrics])
-          db.insert({"params":params, "metrics":metrics})
 
       #remove done futures
       futures = [[p, f] for p, f in futures if not f.done()]
