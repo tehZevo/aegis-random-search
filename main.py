@@ -44,6 +44,9 @@ def run(**kwargs):
     compose_project_name=f"aegis-random-search_{EXPERIMENT_NAME}_{id}"
   )
 
+  #build containers first
+  client.compose.build()
+  
   #compose run (stream=True to output lines)
   #TODO: suppress output
   #TODO: cleanup
