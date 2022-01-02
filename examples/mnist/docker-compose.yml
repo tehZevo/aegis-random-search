@@ -3,6 +3,8 @@ services:
 
   main:
     build: .
+    #give the built image a tag so it doesn't get prefixed 999999 times
+    image: mnist-search:latest
     environment:
       N_LAYERS: ${N_LAYERS}
       LAYER_SIZE: ${LAYER_SIZE}

@@ -2,6 +2,7 @@ import os, random, time, threading, json, contextlib, uuid
 import concurrent.futures
 
 import yaml
+import shortuuid
 from python_on_whales import docker, DockerClient
 from protopost import ProtoPost, protopost_client as ppcl
 
@@ -30,7 +31,7 @@ def unpack_mhps(params):
 
 def run(**kwargs):
   #create project name
-  id = uuid.uuid4()
+  id = shortuuid.uuid()
   #create env file from kwargs
   env_filename = f"{id}.env"
   with open(env_filename, "w") as f:
@@ -41,7 +42,7 @@ def run(**kwargs):
   client = DockerClient(
     compose_files=[os.path.join(BUILD_CONTEXT, "docker-compose.yml")],
     compose_env_file=env_filename,
-    compose_project_name=f"aegis-random-search_{EXPERIMENT_NAME}_{id}"
+    compose_project_name=f"{EXPERIMENT_NAME}-search-{id}"
   )
 
   #build containers first
@@ -60,12 +61,15 @@ def run(**kwargs):
   metrics = output[-1]
   metrics = json.loads(metrics)
 
+  #close/ramove other containers
+  client.compose.down(volumes=True)
+
   #remove volumes
   client.compose.rm(volumes=True)
 
   #remove images (might not actually be necessary in cases of clean exits, TODO: test)
-  for image in images:
-    image.remove()
+  # for image in images:
+  #   image.remove()
 
   #delete env file
   os.remove(env_filename)
