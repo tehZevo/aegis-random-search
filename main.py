@@ -16,6 +16,18 @@ print(PARAMS)
 
 BUILD_CONTEXT = os.getenv("BUILD_CONTEXT", "/target")
 
+#"unpack" metahyperparameters
+def unpack_mhps(params):
+  new_params = {}
+  for k, v in params.items():
+    if type(v) == dict:
+      for k2, v2 in v.items():
+        new_params[k2] = v2
+    else:
+      new_params[k] = v
+
+  return new_params
+
 def run(**kwargs):
   #create project name
   id = uuid.uuid4()
@@ -56,6 +68,8 @@ def choose_params(param_options):
   params = {}
   for k, v in param_options.items():
     params[k] = random.choice(v)
+
+  params = unpack_mhps(params)
   return params
 
 
