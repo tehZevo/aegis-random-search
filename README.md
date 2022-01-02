@@ -31,7 +31,7 @@ The last line of stdout from the `main` service is parsed as json and interprete
 ### MetaHyperParameters
 In cases where related parameters are required, a list of dicts can be provided:
 ```yaml
-MHP: [{A:1, B:10}, {A:2, B:20}]
+MHP: [{"A":1, "B":10}, {"A":2, "B":20}]
 ```
 Here, either A as 1 and B as 10 will be selected OR A as 2 and B as 20 will be selected. A and B will be treated as their own hyperparameters when being passed to the target stack and when logging (the term `MHP` will not appear).
 
