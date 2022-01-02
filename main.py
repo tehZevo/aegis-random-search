@@ -3,11 +3,13 @@ import concurrent.futures
 
 import yaml
 from python_on_whales import docker, DockerClient
-from protopost import ProtoPost
+from protopost import ProtoPost, protopost_client as ppcl
 
 PORT = int(os.getenv("PORT", 80))
 NUM_WORKERS = int(os.getenv("NUM_WORKERS", 4))
 DELAY = float(os.getenv("DELAY", 0))
+EXPERIMENT_NAME = os.getenv("EXPERIMENT_NAME", "experiment")
+TENSORBOARD_LOGGER_URL = os.getenv("TENSORBOARD_LOGGER_URL", None)
 PARAMS = os.getenv("PARAMS", {})
 PARAMS = yaml.safe_load(PARAMS)
 print(PARAMS)
@@ -27,7 +29,7 @@ def run(**kwargs):
   client = DockerClient(
     compose_files=[os.path.join(BUILD_CONTEXT, "docker-compose.yml")],
     compose_env_file=env_filename,
-    compose_project_name=f"aegis-random-search-{id}"
+    compose_project_name=f"aegis-random-search_{EXPERIMENT_NAME}_{id}"
   )
 
   #compose run (stream=True to output lines)
@@ -48,7 +50,7 @@ def run(**kwargs):
   os.remove(env_filename)
 
   time.sleep(DELAY)
-  return metrics
+  return id, metrics
 
 def choose_params(param_options):
   params = {}
@@ -83,10 +85,15 @@ def thread_cute():
       #for each future that completes, append [params, metrics] to results
       for params, future in futures:
         if future.done():
-          metrics = future.result()
+          id, metrics = future.result()
           counter += 1
           print(counter, params, metrics)
           results.append([params, metrics])
+          if TENSORBOARD_LOGGER_URL is not None:
+            ppcl(f"{TENSORBOARD_LOGGER_URL}/hparams/{EXPERIMENT_NAME}/{id}", {
+              "params": params,
+              "metrics": metrics
+            })
 
       #remove done futures
       futures = [[p, f] for p, f in futures if not f.done()]

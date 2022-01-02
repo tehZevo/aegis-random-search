@@ -8,11 +8,25 @@ services:
     volumes:
       - "//var/run/docker.sock:/var/run/docker.sock"
       #mount target build context
-      - "./examples/mnist-compose:/target"
+      - "./examples/mnist:/target"
     environment:
       NUM_WORKERS: 4
+      TENSORBOARD_LOGGER_URL: "http://logger"
       PARAMS: |
         N_LAYERS: [1, 2, 3]
         LAYER_SIZE: [16, 32, 64]
         ACTIVATION: ["tanh", "relu"]
         LR: [1e-2, 1e-3, 1e-4]
+
+  logger:
+    build: https://github.com/tehZevo/aegis-tensorboard.git
+    volumes:
+      - "./tensorboard:/app/runs"
+
+  tensorboard:
+    image: tensorflow/tensorflow
+    volumes:
+      - "./tensorboard:/runs"
+    ports:
+      - "6006:6006"
+    command: "tensorboard --logdir /runs --bind_all"

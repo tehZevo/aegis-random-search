@@ -4,11 +4,13 @@ a docker container that launches docker containers. tries hyperparameters; colle
 *Docker optimizapus,* ***BLAH!***
 
 ## Environment
+- `EXPERIMENT_NAME` - name of the experiment; will be used in compose project name and TensorBoard hyperparameter logging (if enabled); (defaults to "experiment")
 - `NUM_WORKERS` - number of simultaneous stacks to deploy (defaults to 4)
 - `DELAY` - number of seconds to wait after every run (defaults to 0)
 - `BUILD_CONTEXT` - `docker-compose.yml` location
-- `PORT` - the port to listen on (defaults to 80)
+- `TENSORBOARD_LOGGER_URL` - logger of an [aegis-tensorboard](https://github.com/tehZevo/aegis-tensorboard) instance to log hyperparameters and metrics to; defaults to None (disabled)
 - `PARAMS` - a YAML dictionary-of-lists representing the hyperparameters to try (see `./docker-compose.yml` for an example)
+- `PORT` - the port to listen on (defaults to 80)
 
 ## Usage
 ### `PARAMS` dictionary
