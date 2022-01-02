@@ -51,7 +51,7 @@ def run(**kwargs):
   #TODO: suppress output
   #TODO: cleanup
   # with contextlib.redirect_stdout(None):
-  output = client.compose.run("main", tty=False, stream=True)
+  output = client.compose.run("main", tty=False, stream=True, remove=True)
   #grab list of images of running containers
   images = [docker.image.inspect(container.image) for container in docker.compose.ps()]
   output = [s[1] for s in output if s[0] == "stdout"] #grab all stdout lines
@@ -60,10 +60,10 @@ def run(**kwargs):
   metrics = output[-1]
   metrics = json.loads(metrics)
 
-  #remove containers
-  client.compose.down(volumes=True)
+  #remove volumes
+  client.compose.rm(volumes=True)
 
-  #remove images
+  #remove images (might not actually be necessary in cases of clean exits, TODO: test)
   for image in images:
     image.remove()
 
