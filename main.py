@@ -46,12 +46,14 @@ def run(**kwargs):
 
   #build containers first
   client.compose.build()
-  
+
   #compose run (stream=True to output lines)
   #TODO: suppress output
   #TODO: cleanup
   # with contextlib.redirect_stdout(None):
   output = client.compose.run("main", tty=False, stream=True)
+  #grab list of images of running containers
+  images = [docker.image.inspect(container.image) for container in docker.compose.ps()]
   output = [s[1] for s in output if s[0] == "stdout"] #grab all stdout lines
 
   #last line of stdout is the result (json)
@@ -60,6 +62,10 @@ def run(**kwargs):
 
   #remove containers
   client.compose.down(volumes=True)
+
+  #remove images
+  for image in images:
+    image.remove()
 
   #delete env file
   os.remove(env_filename)
