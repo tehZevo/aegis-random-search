@@ -42,3 +42,4 @@ Here, either A as 1 and B as 10 will be selected OR A as 2 and B as 20 will be s
 - catch uncaught exceptions and sigint/sigterm to "clean up"
   - send sigint/sigterm to child containers (docker compose down?) on exception or sigint/sigterm
 - test dependencies starting
+- consider bayesian optimization
